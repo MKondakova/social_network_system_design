@@ -97,6 +97,12 @@ paths:
       responses:
         '200':
           description: Пост удален
+        '400':
+          description: Bad request
+        '404':
+          description: Not found
+        '500':
+          description: Server error
 
     patch:
       summary: Обновить текст поста
@@ -133,6 +139,19 @@ paths:
         - name: post_id
           in: path
           required: true
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          description: Количество комментариев
+          required: false
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          description: Смещение для пагинации
+          required: false
           schema:
             type: integer
       responses:
@@ -194,7 +213,7 @@ paths:
           description: Not found
         '500':
           description: Server error
-  /posts/{post_id}/like:
+  /posts/{post_id}/likes:
     post:
       summary: Лайкнуть пост
       tags: [Посты]
@@ -211,8 +230,23 @@ paths:
           description: Not found
         '500':
           description: Server error
-
-  /dialogs:
+    delete:
+      summary: Убрать лайк
+      tags: [Посты]
+      parameters:
+        - name: post_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Лайк удален
+        '404':
+          description: Not found
+        '500':
+          description: Server error
+  /chats:
     get:
       summary: Получить все диалоги
       tags: [Сообщения]
@@ -224,12 +258,12 @@ paths:
               schema:
                 type: object
                 properties:
-                  dialogs:
+                  chats:
                     type: array
                     items:
                       type: object
                       properties:
-                        dialog_id:
+                        chat_id:
                           type: integer
                         user_id:
                           type: integer
@@ -249,12 +283,12 @@ paths:
           description: Not found
         '500':
           description: Server error
-  /dialogs/{dialog_id}:
+  /chats/{chat_id}/messages:
     get:
       summary: Получить сообщения диалога
       tags: [Сообщения]
       parameters:
-        - name: dialog_id
+        - name: chat_id
           in: path
           required: true
           schema:
@@ -300,11 +334,15 @@ paths:
           description: Not found
         '500':
           description: Server error
-
-  /messages:
     post:
       summary: Отправить сообщение
       tags: [Сообщения]
+      parameters:
+        - name: chat_id
+          in: path
+          required: true
+          schema:
+            type: integer
       requestBody:
         required: true
         content:
@@ -312,9 +350,9 @@ paths:
             schema:
               type: object
               properties:
-                dialog_id:
-                  type: integer
                 text:
+                  type: string
+                image_url:
                   type: string
       responses:
         '201':
@@ -330,6 +368,20 @@ paths:
     get:
       summary: Получить подписки
       tags: [Пользователи]
+      parameters:
+        - name: limit
+          in: query
+          description: Количество подписок в выдаче
+          required: false
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          description: Смещение для пагинации
+          required: false
+          schema:
+            type: integer
       responses:
         '200':
           description: Список подписок
@@ -353,7 +405,6 @@ paths:
           description: Not found
         '500':
           description: Server error
-
     post:
       summary: Добавить подписку
       tags: [Пользователи]
@@ -370,6 +421,24 @@ paths:
       responses:
         '201':
           description: Подписка добавлена
+        '404':
+          description: Not found
+        '500':
+          description: Server error
+  /subscriptions/{subscription_id}:
+    delete:
+      summary: Удалить подписку
+      tags: [Пользователи]
+      parameters:
+        - name: subscription_id
+          in: path
+          description: user_id пользователя, на которого была подписка
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Подписка удалена
         '404':
           description: Not found
         '500':
@@ -466,7 +535,7 @@ paths:
       tags: [Пользователи]
       parameters:
         - name: user_id
-          in: path
+          in: query
           required: true
           schema:
             type: integer
@@ -514,4 +583,3 @@ paths:
           description: Bad request
         '500':
           description: Server error
-                    
