@@ -1,0 +1,585 @@
+openapi: 3.0.3
+info:
+  title: Социальная сеть для путешественников
+  version: 0.1.0
+paths:
+  /posts:
+    get:
+      summary: Получить посты
+      tags: [Посты]
+      parameters:
+        - name: limit
+          in: query
+          description: Количество постов на странице
+          required: false
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          description: Смещение для пагинации
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Список постов
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  posts:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        user_avatar_url:
+                          type: string
+                        user_name:
+                          type: string
+                        user_id:
+                          type: integer
+                        picture_url:
+                          type: string
+                        text:
+                          type: string
+                        geolocation:
+                          type: string
+                        likes:
+                          type: integer
+                        post_id:
+                          type: integer
+        '400':
+          description: Bad request
+        '500':
+          description: Server error
+    post:
+      summary: Создать пост
+      tags: [Посты]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                picture_url:
+                  type: string
+                text:
+                  type: string
+                geolocation:
+                  type: string
+      responses:
+        '201':
+          description: Пост создан
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  post_id:
+                    type: integer
+        '400':
+          description: Bad request
+        '500':
+          description: Server error
+  /posts/{post_id}:
+    delete:
+      summary: Удалить пост
+      tags: [Посты]
+      parameters:
+        - name: post_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Пост удален
+        '400':
+          description: Bad request
+        '404':
+          description: Not found
+        '500':
+          description: Server error
+
+    patch:
+      summary: Обновить текст поста
+      tags: [Посты]
+      parameters:
+        - name: post_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                text:
+                  type: string
+      responses:
+        '200':
+          description: Пост обновлен
+        '400':
+          description: Bad request
+        '404':
+          description: Not found
+        '500':
+          description: Server error
+  /posts/{post_id}/comments:
+    get:
+      summary: Получить комментарии к посту
+      tags: [Посты]
+      parameters:
+        - name: post_id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          description: Количество комментариев
+          required: false
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          description: Смещение для пагинации
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Список комментариев
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  comments:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        text:
+                          type: string
+                        user_avatar_url:
+                          type: string
+                        user_name:
+                          type: string
+                        user_id:
+                          type: integer
+        '404':
+          description: Not found
+        '500':
+          description: Server error
+    post:
+      summary: Добавить комментарий к посту
+      tags: [Посты]
+      parameters:
+        - name: post_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                text:
+                  type: string
+      responses:
+        '201':
+          description: Комментарий создан
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  comment_id:
+                    type: integer
+        '400':
+          description: Bad request
+        '404':
+          description: Not found
+        '500':
+          description: Server error
+  /posts/{post_id}/likes:
+    post:
+      summary: Лайкнуть пост
+      tags: [Посты]
+      parameters:
+        - name: post_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Лайк добавлен
+        '404':
+          description: Not found
+        '500':
+          description: Server error
+    delete:
+      summary: Убрать лайк
+      tags: [Посты]
+      parameters:
+        - name: post_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Лайк удален
+        '404':
+          description: Not found
+        '500':
+          description: Server error
+  /chats:
+    get:
+      summary: Получить все диалоги
+      tags: [Сообщения]
+      responses:
+        '200':
+          description: Список диалогов
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  chats:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        chat_id:
+                          type: integer
+                        user_id:
+                          type: integer
+                        user_name:
+                          type: string
+                        user_avatar_url:
+                          type: string
+                        last_message:
+                          type: object
+                          properties:
+                            text:
+                              type: string
+                            time:
+                              type: string
+                              format: date-time
+        '404':
+          description: Not found
+        '500':
+          description: Server error
+  /chats/{chat_id}/messages:
+    get:
+      summary: Получить сообщения диалога
+      tags: [Сообщения]
+      parameters:
+        - name: chat_id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          description: Количество сообщений на странице
+          required: false
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          description: Смещение для пагинации
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Список сообщений
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  messages:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        user_id:
+                          type: integer
+                        text:
+                          type: string
+                        time:
+                          type: string
+                          format: date-time
+                        image_url:
+                          type: string
+        '400':
+          description: Bad request
+        '404':
+          description: Not found
+        '500':
+          description: Server error
+    post:
+      summary: Отправить сообщение
+      tags: [Сообщения]
+      parameters:
+        - name: chat_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                text:
+                  type: string
+                image_url:
+                  type: string
+      responses:
+        '201':
+          description: Сообщение отправлено
+        '400':
+          description: Bad request
+        '404':
+          description: Not found
+        '500':
+          description: Server error
+          
+  /subscriptions:
+    get:
+      summary: Получить подписки
+      tags: [Пользователи]
+      parameters:
+        - name: limit
+          in: query
+          description: Количество подписок в выдаче
+          required: false
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          description: Смещение для пагинации
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Список подписок
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  subscriptions:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        user_avatar_url:
+                          type: string
+                        user_id:
+                          type: integer
+                        user_name:
+                          type: string
+        '404':
+          description: Not found
+        '500':
+          description: Server error
+    post:
+      summary: Добавить подписку
+      tags: [Пользователи]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                subscription_id:
+                  description: user_id пользователя, на которого подписываются
+                  type: integer
+      responses:
+        '201':
+          description: Подписка добавлена
+        '404':
+          description: Not found
+        '500':
+          description: Server error
+  /subscriptions/{subscription_id}:
+    delete:
+      summary: Удалить подписку
+      tags: [Пользователи]
+      parameters:
+        - name: subscription_id
+          in: path
+          description: user_id пользователя, на которого была подписка
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Подписка удалена
+        '404':
+          description: Not found
+        '500':
+          description: Server error
+
+  /users/{user_id}:
+    get:
+      summary: Получить информацию о пользователе
+      tags: [Пользователи]
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Информация о пользователе
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user_avatar_url:
+                    type: string
+                  user_id:
+                    type: integer
+                  user_name:
+                    type: string
+        '404':
+          description: Not found
+        '500':
+          description: Server error
+
+  /users/{user_id}/posts:
+    get:
+      summary: Получить посты пользователя
+      tags: [Пользователи]
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          description: Количество постов на странице
+          required: false
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          description: Смещение для пагинации
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Список постов пользователя
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  posts:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        picture_url:
+                          type: string
+                        text:
+                          type: string
+                        geolocation:
+                          type: string
+                        user_id:
+                          type: integer
+                        user_name:
+                          type: string
+                        likes:
+                          type: integer
+                        post_id:
+                          type: integer
+        '400':
+          description: Bad request
+        '404':
+          description: Not found
+        '500':
+          description: Server error
+  /avatar:
+    post:
+      summary: Установить новую аватарку
+      tags: [Пользователи]
+      parameters:
+        - name: user_id
+          in: query
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  avatar_url:
+                    type: string
+      responses:
+        '201':
+          description: Аватар добавлен
+        '400':
+          description: Bad request
+        '500':
+          description: Server error
+  /images:
+    post:
+      summary: Загрузить изображение и получить URL изображения
+      tags: [Изображения]
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: Изображение загружено
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  image_url:
+                    type: string
+        '400':
+          description: Bad request
+        '500':
+          description: Server error
