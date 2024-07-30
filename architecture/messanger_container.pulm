@@ -1,0 +1,28 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+Person(user, "User")
+
+Container(geolocation, "Geolocation system","", "Gives geo information from coordinates")
+Container(oauth, "OAuth provider","", "Grant authorization")
+
+System_Boundary(c1, "Traveler Social Network") {
+    Container(loadBalancer, "Load balancer", "Round Robin", "distributes the load and validates the JWT")
+    Container_Boundary(messenger, "Messenger") {
+        Container(messangerBackend, "Messenge service", "", "Work with messages and chats")
+        ContainerDb(messangerDB, "Messanger db", "Relational DB", "")
+        Rel(messangerBackend, messangerDB, "")
+    }
+    System(socialNetwork, "Social network")
+    System(media, "Media service")
+}
+
+Rel(user, loadBalancer, "")
+Rel(loadBalancer, socialNetwork, "Get posts")
+Rel(loadBalancer, socialNetwork, "Get feed")
+Rel(loadBalancer, socialNetwork, "Processing followers")
+Rel(user, media, "Upload and load images")
+Rel(loadBalancer, messangerBackend, "Send messenges")
+Rel(socialNetwork, geolocation, "Recive text information about geoposition")
+Rel(c1, oauth, "Recive jwt")
+@enduml

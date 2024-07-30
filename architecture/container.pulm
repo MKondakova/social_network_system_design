@@ -1,0 +1,55 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+Person(user, "User")
+
+Container(geolocation, "Geolocation system","", "Gives geo information from coordinates")
+Container(oauth, "OAuth provider","", "Grant authorization")
+
+System_Boundary(c1, "Traveler Social Network") {
+    Container(loadBalancer, "Load balancer", "Round Robin", "distributes the load and validates the JWT")
+    Container_Boundary(messenger, "Messenger") {
+        Container(messangerBackend, "Messenge service", "", "Work with messages and chats")
+        ContainerDb(messangerDB, "Messanger db", "Relational DB", "")
+        Rel(messangerBackend, messangerDB, "")
+    }
+    Container_Boundary(socialNetwork, "Social network"){
+        Container(feedService, "Feed service", "", "Updates and creating cached feed")
+        ContainerDb(feedDB, "Feed storage", "In-memory DB")
+        Rel(feedService, feedDB, "")
+
+        Container(postsCache, "Posts cache", "", "Store the most popular posts")
+        Container(postsService, "Posts service", "", "Creates and provides posts")
+        ContainerDb(postDB, "Posts DB", "Relational DB")
+        Rel(postsService, postDB, "")
+        Rel(postsCache, postsService, "")
+        Rel(user, postsService, "Add posts")
+
+        ContainerQueue(postsQueue, "Posts queue", "", "Store created posts")
+        Rel(postsService, postsQueue, "")
+        Rel(postsQueue, feedService, "Updates stored feeds")
+
+        Container(followService, "Follow service", "", "Work with follows")
+        ContainerDb(followDB, "Followers DB", "Relation DB")
+        Rel(followService, followDB, "")
+
+        Rel(feedService, postsService, "")
+        Rel(feedService, followService, "")
+
+    }
+    Container_Boundary(media, "Media service") {
+        Container(mediaService, "Media service", "", "Working with images")
+        ContainerDb(mediaDB, "Media storage", "S3")
+        Rel(mediaService, mediaDB, "")
+    }
+}
+
+Rel(user, loadBalancer, "")
+Rel(loadBalancer, postsCache, "Get posts")
+Rel(loadBalancer, feedService, "Get feed")
+Rel(loadBalancer, followService, "Processing followers")
+Rel(user, mediaService, "Upload and load images")
+Rel(loadBalancer, messangerBackend, "Send messenges")
+Rel(postsService, geolocation, "Recive text information about geoposition")
+Rel(c1, oauth, "Recive jwt")
+@enduml
