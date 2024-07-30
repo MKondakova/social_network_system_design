@@ -23,3 +23,4 @@ Table MessagesReadability {
     (user, chat) [pk]
   }
 }
+
