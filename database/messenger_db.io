@@ -11,6 +11,16 @@ Table Messages {
   author uuid [not null, ref: > Users.id]
   chat uuid [not null, ref: > Chats.id]
   content text
-  readed bool [default: false]
   created_at timestamp [not null]
 }
+
+Table MessagesReadability {
+  chat uuid [ref :> Chats.id]
+  last_read uuid [ref :> Messages.id]
+  user uuid [ref :> Users.id]
+  readed_at timestamp
+  indexes {
+    (user, chat) [pk]
+  }
+}
+
